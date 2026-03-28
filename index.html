@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta name="google-site-verification" content="MVta7fYIufFXDOm8V4xosjfixFWA8pgXkMYCqivCvJE" />
+  <!-- Favicon básico -->
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+<link rel="shortcut icon" href="favicon.ico">
+
+<!-- Icono Apple -->
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+<!-- Iconos Android / Chrome -->
+<link rel="icon" type="image/png" sizes="192x192" href="android-chrome-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="android-chrome-512x512.png">
+
+<!-- Manifest -->
+<link rel="manifest" href="site.webmanifest">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FILMBOX</title>
+  <meta name="description" content="Vive el cine sin límites en FILMBOX. Mira películas y series gratis en línea con los mejores estrenos, acción y suspenso.">
+<style>
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #111;
+    color: #fff;
+  }
+
+  header {
+    position: sticky;
+    top: 0;
+    background-color: rgba(17,17,17,0.9);
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    z-index: 100;
+  }
+
+  header .logo {
+    font-size: 20px;
+    font-weight: bold;
+    color: #e81c1c;
+    margin-right: 15px;
+  }
+
+  header input {
+    flex: 1;
+    padding: 8px 12px;
+    border-radius: 20px;
+    border: none;
+    outline: none;
+    background: #222;
+    color: #ffffff;
+  }
+
+  .movies {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .movie-card {
+    position: relative;
+    background-size: cover;
+    background-position: center;
+    aspect-ratio: 2/3;
+    border-radius: 6px;
+    cursor: pointer;
+    display: block;
+    transition: transform 0.3s ease;
+    text-decoration: none;
+  }
+
+  .movie-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(0,255,0,0.7);
+  }
+
+  .movie-card .quality-tag {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background-color: #e81c1c;
+    color: #fff;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 3px 6px;
+    border-radius: 4px;
+    z-index: 10;
+  }
+  /* 🔹 Ajuste del reproductor según orientación */
+@media (orientation: landscape) {
+  .header {
+    height: 100vh; /* ocupa toda la altura horizontal */
+  }
+
+  .header iframe {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+@media (orientation: portrait) {
+  .header {
+    height: 200px; /* tamaño original vertical */
+  }
+
+  .header iframe {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+/* 🔹 Contenido dinámico adaptativo */
+.content {
+  display: flex;
+  flex-wrap: wrap; /* se adapta si la pantalla es pequeña */
+  gap: 15px;
+}
+
+.poster img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 10px;
+}
+
+.details {
+  flex: 1 1 auto; /* se adapta al espacio disponible */
+}
+
+.synopsis {
+  width: 100%;
+}
+</style>
+</head>
+<body>
+  
+
+
+            
+  
+<!-- Loader -->
+<div id="loader" style="
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #000; /* Fondo negro */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column; /* Para que el texto quede debajo */
+  z-index: 9999;
+">
+  <!-- Logo más pequeño -->
+  <div style="
+    width: 60px;
+    height: 60px;
+    border: 4px solid #fff;
+    border-top: 4px solid #e50914; /* rojo Filmbox */
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  "></div>
+
+  <!-- Texto minimalista debajo del loader -->
+  <div style="
+    color: #aaa;  /* gris */
+    margin-top: 8px;
+    font-family: Arial, sans-serif;
+    font-size: 12px; /* más pequeño */
+    letter-spacing: 0.5px;
+  ">
+    CARGANDO NUESTRO CONTENIDO
+  </div>
+</div>
+
+<style>
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+</style>
+
+<script>
+  window.addEventListener("load", function() {
+    const loader = document.getElementById("loader");
+
+    // Revisar si ya se mostró en esta sesión
+    if (sessionStorage.getItem("loaderShown")) {
+      loader.style.display = "none"; // no mostrar de nuevo
+      return;
+    }
+
+    // Si no se ha mostrado → mostrar y luego ocultar
+    setTimeout(() => {
+      loader.style.transition = "opacity 1s ease";
+      loader.style.opacity = 0;
+
+      setTimeout(() => {
+        loader.style.display = "none";
+      }, 1000);
+    }, 4000); // 4 segundos
+
+    // Guardar que ya se mostró
+    sessionStorage.setItem("loaderShown", "true");
+  });
+</script>
+<header>
+  <div class="logo">FILMBOX</div>
+  <input type="text" id="search" placeholder="Buscar...">
+</header>
+  <!-- 🔔 Aviso global debajo del logo/buscador -->
+<div class="marquee">
+  <span>NUEVO CONTENIDO AGREGO</span>
+</div>
+
+<style>
+  .marquee {
+    width: 100%;
+    overflow: hidden;
+    background: #e50914; /* rojo tipo Netflix */
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 8px 0;
+    white-space: nowrap;
+    margin-top: 10px; /* espacio respecto al buscador */
+    border-radius: 6px; /* opcional, para que se vea más elegante */
+  }
+
+  .marquee span {
+    display: inline-block;
+    padding-left: 100%;
+    animation: scroll 12s linear infinite;
+  }
+
+  @keyframes scroll {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-100%); }
+  }
+</style>
+
+<section class="movies" id="movieList">
+  <!-- Las películas se cargarán aquí desde el JSON -->
+</section>
+
+<script>
+const movieList = document.getElementById('movieList');
+const searchInput = document.getElementById('search');
+let moviesData = [];
+
+// Cargar JSON
+fetch('Peliculas.json')
+  .then(response => response.json())
+  .then(data => {
+    moviesData = data;
+    renderMovies(moviesData);
+  });
+
+// Función para mostrar películas
+function renderMovies(movies) {
+  movieList.innerHTML = '';
+  movies.forEach(movie => {
+    const a = document.createElement('a');
+    a.className = 'movie-card';
+    a.href = movie.link;
+    a.dataset.title = movie.title;
+    a.style.backgroundImage = `url('${movie.poster}')`;
+
+    const span = document.createElement('span');
+    span.className = 'quality-tag';
+    span.textContent = movie.quality || 'HD';
+
+    a.appendChild(span);
+    movieList.appendChild(a);
+  });
+}
+
+// Buscador
+searchInput.addEventListener('input', () => {
+  const q = searchInput.value.toLowerCase();
+  const filtered = moviesData.filter(movie => movie.title.toLowerCase().includes(q));
+  renderMovies(filtered);
+});
+
+let isSearching = false;
+
+// Detectar cuando empieza a buscar
+searchInput.addEventListener('input', () => {
+  const q = searchInput.value.toLowerCase();
+
+  if (q.length > 0 && !isSearching) {
+    history.pushState({ search: true }, '');
+    isSearching = true;
+  }
+
+  if (q.length === 0) {
+    isSearching = false;
+
+    // 🔥 quitar foco si borra todo manualmente
+    searchInput.blur();
+  }
+
+  const filtered = moviesData.filter(movie =>
+    movie.title.toLowerCase().includes(q)
+  );
+
+  renderMovies(filtered);
+});
+
+// 🔥 BOTÓN ATRÁS (CLAVE)
+window.addEventListener('popstate', () => {
+  if (isSearching || searchInput.value !== '') {
+
+    // limpiar buscador
+    searchInput.value = '';
+    renderMovies(moviesData);
+
+    isSearching = false;
+
+    // 🔥 cerrar teclado / quitar cursor
+    searchInput.blur();
+
+    // evitar que se salga de la página
+    history.pushState({ search: false }, '');
+  }
+});
+  
+</script>
+<script>
+  // 🔹 Guardar posición del scroll antes de salir de la página
+  window.addEventListener("beforeunload", () => {
+    sessionStorage.setItem("scrollPos", window.scrollY);
+  });
+
+  // 🔹 Restaurar posición cuando el usuario regresa o recarga
+  window.addEventListener("load", () => {
+    const scrollPos = sessionStorage.getItem("scrollPos");
+    if (scrollPos) {
+      setTimeout(() => {
+        window.scrollTo(0, parseInt(scrollPos));
+      }, 100); // pequeño retraso para asegurar que el contenido ya se renderizó
+    }
+  });
+
+  // 🔹 Limpiar el scroll guardado si entra desde otra sección (opcional)
+  if (!document.referrer.includes(window.location.hostname)) {
+    sessionStorage.removeItem("scrollPos");
+  }
+</script>
+
+
+  
+</body>
+</html>
